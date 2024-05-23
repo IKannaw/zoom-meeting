@@ -40,7 +40,7 @@ class ZoomService
 
     public function createMeeting(Request $request)
     {
-        $response = $this->client->post('https://api.zoom.us/v2/users/me/meetings', [
+        $response = $this->client->post("https://api.zoom.us/v2/users/me/meetings", [
             'verify' => false,
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->accessToken,
@@ -61,9 +61,9 @@ class ZoomService
                 ],
             ],
         ]);
-
+    
         return response()->json(json_decode($response->getBody()->getContents()), $response->getStatusCode());
-    }
+    }    
 
     public function listMeetings()
     {
@@ -75,5 +75,52 @@ class ZoomService
         ]);
 
         return json_decode($response->getBody(), true);
+    }
+
+    public function addUser(Request $request)
+    {
+        $headerConfig = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->accessToken,
+                'Content-Type' => 'application/json',
+            ],
+        ];
+
+        try {
+            $response = Http::post("https://api.zoom.us/v2/users", $request->all(), $headerConfig);
+            return response()->json($response->json());
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error creating user'], 500);
+        }
+    }
+
+    public function getUsers()
+    {
+        $client = new Client();
+        $accessToken = $this->getAccessToken();
+
+        try {
+            $response = $client->request('GET', 'https://api.zoom.us/v2/users', [
+                'verify' => false,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type' => 'application/json',
+                ]
+            ]);
+
+            return response()->json(json_decode($response->getBody(), true), 200);
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            Log::error('Error fetching meetings: ' . $e->getMessage());
+            if ($e->hasResponse()) {
+                $response = $e->getResponse();
+                $statusCode = $response->getStatusCode();
+                $body = $response->getBody()->getContents();
+                Log::error('Response Status: ' . $statusCode);
+                Log::error('Response Body: ' . $body);
+                return response()->json(['error' => 'Failed to fetch meetings', 'details' => json_decode($body, true)], $statusCode);
+            } else {
+                return response()->json(['error' => 'Failed to fetch meetings', 'details' => $e->getMessage()], 500);
+            }
+        }
     }
 }

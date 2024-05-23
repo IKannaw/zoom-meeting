@@ -10,5 +10,7 @@ Route::get('/', function () {
 });
 
 Route::get('/zoom/token', [ZoomTokenController::class, 'fetchToken'])->middleware('cors');
-Route::post('/zoom/meetings', [ZoomController::class, 'createMeeting'])->middleware('cors');
+Route::get('/zoom/users', [ZoomController::class, 'getUsers']);
+Route::post('/zoom/user', [ZoomController::class, 'addUser']);
+Route::post('/zoom/meetings', [ZoomController::class, 'createMeeting']);
 Route::get('/zoom/meetings', [ZoomController::class, 'listMeetings'])->middleware('cors');

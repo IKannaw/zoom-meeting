@@ -17,7 +17,7 @@ class ZoomController extends Controller
     {
         $data = $request->all();
         $meeting = $this->zoomService->createMeeting($data);
-
+    
         return response()->json($meeting);
     }
 
@@ -26,5 +26,15 @@ class ZoomController extends Controller
         $meetings = $this->zoomService->listMeetings();
 
         return response()->json($meetings);
+    }
+
+    public function addUser(){
+        $user=$this->zoomService -> addUser();
+        return response()->json($user);
+    }
+
+    public function getUsers(){
+        $users =$this->zoomService -> getUsers();
+        return response()->json($users);
     }
 }
